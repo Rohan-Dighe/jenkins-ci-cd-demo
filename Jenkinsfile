@@ -16,13 +16,13 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the application...'
-                // Check the current directory and list the files to ensure we're in the correct directory
-                sh 'pwd'  // Print the current working directory
-                sh 'ls -l' // List files to ensure the presence of the pom.xml
 
-                // If pom.xml is in a subfolder (for example, 'my-app'), use the 'dir' block to navigate there
-                // Change 'my-app' to the actual folder name if necessary
-                dir('my-app') {  // Replace 'my-app' with the correct subfolder, if needed
+                // Check the current directory and list files
+                sh 'pwd'
+                sh 'ls -l'
+
+                // Change to the 'my-app' directory and run Maven there
+                dir('my-app') {  // Adjust if your folder name differs
                     sh 'mvn clean package'
                 }
             }
@@ -31,7 +31,7 @@ pipeline {
         stage('Test') {
             steps {
                 echo 'Running tests...'
-                dir('my-app') {  // Again, adjust if necessary
+                dir('my-app') {
                     sh 'mvn test'
                 }
             }
@@ -40,8 +40,7 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying application...'
-                // Example for Docker deployment
-                dir('my-app') {  // Adjust if necessary
+                dir('my-app') {
                     sh '''
                     docker build -t myapp .
                     docker run -d -p 8081:8080 myapp
