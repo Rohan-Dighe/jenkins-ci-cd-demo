@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        GIT_REPO = 'https://github.com/your-username/jenkins-ci-cd-demo.git'
+        GIT_REPO = 'https://github.com/Rohan-Dighe/jenkins-ci-cd-demo.git'
     }
 
     stages {
