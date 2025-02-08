@@ -3,6 +3,8 @@ pipeline {
 
     environment {
         GIT_REPO = 'https://github.com/Rohan-Dighe/jenkins-ci-cd-demo.git'
+        IMAGE_NAME = 'myapp'
+        DOCKER_PORT = '8081:8080'
     }
 
     stages {
@@ -21,31 +23,25 @@ pipeline {
                 sh 'pwd'
                 sh 'ls -l'
 
-                // Change to the 'my-app' directory and run Maven there
-                dir('my-app') {  // Adjust if your folder name differs
-                    sh 'mvn clean package'
-                }
+                // Run Maven from the root directory (if pom.xml is there)
+                sh 'mvn clean package'
             }
         }
 
         stage('Test') {
             steps {
                 echo 'Running tests...'
-                dir('my-app') {
-                    sh 'mvn test'
-                }
+                sh 'mvn test'
             }
         }
 
         stage('Deploy') {
             steps {
                 echo 'Deploying application...'
-                dir('my-app') {
-                    sh '''
-                    docker build -t myapp .
-                    docker run -d -p 8081:8080 myapp
-                    '''
-                }
+                sh '''
+                docker build -t ${IMAGE_NAME} .
+                docker run -d -p ${DOCKER_PORT} ${IMAGE_NAME}
+                '''
             }
         }
     }
