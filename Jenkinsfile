@@ -8,6 +8,7 @@ pipeline {
     stages {
         stage('Clone Repository') {
             steps {
+                echo 'Cloning repository...'
                 git branch: 'main', url: "${GIT_REPO}"
             }
         }
@@ -15,14 +16,24 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the application...'
-                sh 'mvn clean package' // Use 'npm install' for Node.js projects
+                // Check the current directory and list the files to ensure we're in the correct directory
+                sh 'pwd'  // Print the current working directory
+                sh 'ls -l' // List files to ensure the presence of the pom.xml
+
+                // If pom.xml is in a subfolder (for example, 'my-app'), use the 'dir' block to navigate there
+                // Change 'my-app' to the actual folder name if necessary
+                dir('my-app') {  // Replace 'my-app' with the correct subfolder, if needed
+                    sh 'mvn clean package'
+                }
             }
         }
 
         stage('Test') {
             steps {
                 echo 'Running tests...'
-                sh 'mvn test' // Use 'npm test' for JavaScript projects
+                dir('my-app') {  // Again, adjust if necessary
+                    sh 'mvn test'
+                }
             }
         }
 
@@ -30,10 +41,12 @@ pipeline {
             steps {
                 echo 'Deploying application...'
                 // Example for Docker deployment
-                sh '''
-                docker build -t myapp .
-                docker run -d -p 8081:8080 myapp
-                '''
+                dir('my-app') {  // Adjust if necessary
+                    sh '''
+                    docker build -t myapp .
+                    docker run -d -p 8081:8080 myapp
+                    '''
+                }
             }
         }
     }
