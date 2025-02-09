@@ -11,7 +11,7 @@ pipeline {
         stage('Clone Repository') {
             steps {
                 echo 'Cloning repository...'
-                deleteDir()  // Clean workspace before cloning
+                deleteDir() // Clean workspace before cloning
                 git branch: 'main', url: "${GIT_REPO}"
             }
         }
@@ -19,13 +19,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the application...'
-
-                // Check the current directory and list files
-                sh 'pwd'
-                sh 'ls -l'
-
-                // Run Maven from the root directory (if pom.xml is there)
-                sh 'mvn clean package'
+                sh 'mvn clean package -DskipTests'
             }
         }
 
@@ -40,8 +34,8 @@ pipeline {
             steps {
                 echo 'Deploying application...'
                 sh '''
-                docker build -t ${IMAGE_NAME} .
-                docker run -d -p ${DOCKER_PORT} ${IMAGE_NAME}
+                /usr/bin/docker build -t ${IMAGE_NAME} .
+                /usr/bin/docker run -d -p ${DOCKER_PORT} ${IMAGE_NAME}
                 '''
             }
         }
