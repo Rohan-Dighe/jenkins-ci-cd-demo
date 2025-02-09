@@ -5,6 +5,7 @@ pipeline {
         GIT_REPO = 'https://github.com/Rohan-Dighe/jenkins-ci-cd-demo.git'
         IMAGE_NAME = 'myapp'
         DOCKER_PORT = '8081:8080'
+        DOCKER_CMD = '/usr/bin/docker'  // Explicitly define full path to Docker
     }
 
     stages {
@@ -19,55 +20,30 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building the application...'
-
-                // Check the current directory and list files
-                sh 'pwd'
-                sh 'ls -l'
-
-                // Run Maven Build
-                sh '''
-                if [ -f "mvnw" ]; then
-                    chmod +x mvnw
-                    ./mvnw clean package
-                else
-                    mvn clean package
-                fi
-                '''
+                sh 'pwd && ls -l' // Check the workspace directory
+                sh 'mvn clean package'
             }
         }
 
         stage('Test') {
             steps {
                 echo 'Running tests...'
-                sh '''
-                if [ -f "mvnw" ]; then
-                    ./mvnw test
-                else
-                    mvn test
-                fi
-                '''
+                sh 'mvn test'
             }
         }
 
         stage('Deploy') {
             steps {
                 echo 'Deploying application...'
-
-                // Check if Docker is installed
                 sh '''
-                if ! command -v docker &> /dev/null
-                then
-                    echo "Error: Docker is not installed or not in PATH"
-                    exit 1
-                fi
-                '''
+                ${DOCKER_CMD} build -t ${IMAGE_NAME} .
+                
+                # Stop and remove any existing container
+                ${DOCKER_CMD} stop ${IMAGE_NAME} || true
+                ${DOCKER_CMD} rm ${IMAGE_NAME} || true
 
-                // Build and Run Docker Container
-                sh '''
-                docker build -t ${IMAGE_NAME} .
-                docker stop ${IMAGE_NAME} || true
-                docker rm ${IMAGE_NAME} || true
-                docker run -d --name ${IMAGE_NAME} -p ${DOCKER_PORT} ${IMAGE_NAME}
+                # Run the new container
+                ${DOCKER_CMD} run -d --name ${IMAGE_NAME} -p ${DOCKER_PORT} ${IMAGE_NAME}
                 '''
             }
         }
