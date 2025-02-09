@@ -7,13 +7,14 @@ pipeline {
         DOCKER_PORT = '8081:8080'
     }
 
-    stages {
-        stage('Clone Repository') {
-            steps {
-                echo 'Cloning repository...'
-                git branch: 'main', url: "${GIT_REPO}"
-            }
-        }
+    stage('Clone Repository') {
+    steps {
+        echo 'Cloning repository...'
+        deleteDir() // Clean workspace before cloning
+        git branch: 'main', url: "${GIT_REPO}"
+    }
+}
+
 
         stage('Build') {
             steps {
